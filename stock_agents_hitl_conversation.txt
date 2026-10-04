@@ -1,0 +1,875 @@
+MULTI-AGENT STOCK DEMO — COMPLETE state["messages"] HISTORY
+
+Scenario A:
+USER -> "Research Apple and buy some if it looks good"
+USER -> "AAPL"
+USER -> "10 shares, market order"
+USER -> "make it 5 shares instead"
+USER -> "yes"
+
+Synthetic tool-call IDs are used below for readability.
+
+============================================================
+1. REQUEST #1
+User: "Research Apple and buy some if it looks good"
+============================================================
+
+state["messages"]:
+
+[
+  {
+    "role": "user",
+    "content": "Research Apple and buy some if it looks good"
+  },
+  {
+    "role": "assistant",
+    "agent": "supervisor",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a1",
+        "name": "transfer_to_researcher",
+        "args": {
+          "task": "Research Apple and buy some if it looks good"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "id": "a1",
+    "name": "transfer_to_researcher",
+    "content": "Transferred to researcher. Task: Research Apple and buy some if it looks good",
+    "agent": "supervisor"
+  },
+  {
+    "role": "assistant",
+    "agent": "researcher",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a2",
+        "name": "ask_user",
+        "args": {
+          "question": "Which ticker symbol do you mean?"
+        }
+      }
+    ]
+  }
+]
+
+At this point:
+
+state["active"] = "researcher"
+
+state["pending"] = {
+  "kind": "question",
+  "call": {
+    "id": "a2",
+    "name": "ask_user",
+    "args": {
+      "question": "Which ticker symbol do you mean?"
+    }
+  }
+}
+
+The graph pauses.
+
+============================================================
+2. REQUEST #2
+User: "AAPL"
+============================================================
+
+Because there is a pending ask_user, "AAPL" becomes the
+tool result for call a2 rather than a new role=user message.
+
+Then the researcher continues.
+
+state["messages"]:
+
+[
+  {
+    "role": "user",
+    "content": "Research Apple and buy some if it looks good"
+  },
+  {
+    "role": "assistant",
+    "agent": "supervisor",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a1",
+        "name": "transfer_to_researcher",
+        "args": {
+          "task": "Research Apple and buy some if it looks good"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "id": "a1",
+    "name": "transfer_to_researcher",
+    "content": "Transferred to researcher. Task: Research Apple and buy some if it looks good",
+    "agent": "supervisor"
+  },
+  {
+    "role": "assistant",
+    "agent": "researcher",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a2",
+        "name": "ask_user",
+        "args": {
+          "question": "Which ticker symbol do you mean?"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "id": "a2",
+    "name": "ask_user",
+    "content": "AAPL",
+    "agent": "researcher"
+  },
+  {
+    "role": "assistant",
+    "agent": "researcher",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a3",
+        "name": "get_stock_price",
+        "args": {
+          "ticker": "AAPL"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "id": "a3",
+    "name": "get_stock_price",
+    "content": "AAPL trades at $190.12",
+    "agent": "researcher"
+  },
+  {
+    "role": "assistant",
+    "agent": "researcher",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a4",
+        "name": "get_news",
+        "args": {
+          "ticker": "AAPL"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "id": "a4",
+    "name": "get_news",
+    "content": "Headlines: strong iPhone demand, analyst upgrade to Buy",
+    "agent": "researcher"
+  },
+  {
+    "role": "assistant",
+    "agent": "researcher",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a5",
+        "name": "handoff_back",
+        "args": {
+          "summary": "AAPL trades at $190.12. Headlines: strong iPhone demand, analyst upgrade to Buy. Looks bullish."
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "id": "a5",
+    "name": "handoff_back",
+    "content": "AAPL trades at $190.12. Headlines: strong iPhone demand, analyst upgrade to Buy. Looks bullish.",
+    "agent": "researcher"
+  },
+  {
+    "role": "assistant",
+    "agent": "supervisor",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a6",
+        "name": "transfer_to_buyer",
+        "args": {
+          "task": "Buy it if research looks good. AAPL trades at $190.12. Headlines: strong iPhone demand, analyst upgrade to Buy. Looks bullish."
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "id": "a6",
+    "name": "transfer_to_buyer",
+    "content": "Transferred to buyer. Task: Buy it if research looks good. AAPL trades at $190.12. Headlines: strong iPhone demand, analyst upgrade to Buy. Looks bullish.",
+    "agent": "supervisor"
+  },
+  {
+    "role": "assistant",
+    "agent": "buyer",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a7",
+        "name": "ask_user",
+        "args": {
+          "question": "How many shares, and market or limit order?"
+        }
+      }
+    ]
+  }
+]
+
+At this point:
+
+state["active"] = "buyer"
+
+state["pending"] = {
+  "kind": "question",
+  "call": {
+    "id": "a7",
+    "name": "ask_user",
+    "args": {
+      "question": "How many shares, and market or limit order?"
+    }
+  }
+}
+
+The graph pauses.
+
+============================================================
+3. REQUEST #3
+User: "10 shares, market order"
+============================================================
+
+Because there is a pending ask_user, this becomes the tool
+result for call a7.
+
+The buyer then generates place_order.
+
+state["messages"]:
+
+[
+  {
+    "role": "user",
+    "content": "Research Apple and buy some if it looks good"
+  },
+  {
+    "role": "assistant",
+    "agent": "supervisor",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a1",
+        "name": "transfer_to_researcher",
+        "args": {
+          "task": "Research Apple and buy some if it looks good"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "id": "a1",
+    "name": "transfer_to_researcher",
+    "content": "Transferred to researcher. Task: Research Apple and buy some if it looks good",
+    "agent": "supervisor"
+  },
+  {
+    "role": "assistant",
+    "agent": "researcher",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a2",
+        "name": "ask_user",
+        "args": {
+          "question": "Which ticker symbol do you mean?"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "id": "a2",
+    "name": "ask_user",
+    "content": "AAPL",
+    "agent": "researcher"
+  },
+  {
+    "role": "assistant",
+    "agent": "researcher",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a3",
+        "name": "get_stock_price",
+        "args": {
+          "ticker": "AAPL"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "id": "a3",
+    "name": "get_stock_price",
+    "content": "AAPL trades at $190.12",
+    "agent": "researcher"
+  },
+  {
+    "role": "assistant",
+    "agent": "researcher",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a4",
+        "name": "get_news",
+        "args": {
+          "ticker": "AAPL"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "id": "a4",
+    "name": "get_news",
+    "content": "Headlines: strong iPhone demand, analyst upgrade to Buy",
+    "agent": "researcher"
+  },
+  {
+    "role": "assistant",
+    "agent": "researcher",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a5",
+        "name": "handoff_back",
+        "args": {
+          "summary": "AAPL trades at $190.12. Headlines: strong iPhone demand, analyst upgrade to Buy. Looks bullish."
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "id": "a5",
+    "name": "handoff_back",
+    "content": "AAPL trades at $190.12. Headlines: strong iPhone demand, analyst upgrade to Buy. Looks bullish.",
+    "agent": "researcher"
+  },
+  {
+    "role": "assistant",
+    "agent": "supervisor",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a6",
+        "name": "transfer_to_buyer",
+        "args": {
+          "task": "Buy it if research looks good. AAPL trades at $190.12. Headlines: strong iPhone demand, analyst upgrade to Buy. Looks bullish."
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "id": "a6",
+    "name": "transfer_to_buyer",
+    "content": "Transferred to buyer. Task: Buy it if research looks good. AAPL trades at $190.12. Headlines: strong iPhone demand, analyst upgrade to Buy. Looks bullish.",
+    "agent": "supervisor"
+  },
+  {
+    "role": "assistant",
+    "agent": "buyer",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a7",
+        "name": "ask_user",
+        "args": {
+          "question": "How many shares, and market or limit order?"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "id": "a7",
+    "name": "ask_user",
+    "content": "10 shares, market order",
+    "agent": "buyer"
+  },
+  {
+    "role": "assistant",
+    "agent": "buyer",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a8",
+        "name": "place_order",
+        "args": {
+          "ticker": "AAPL",
+          "qty": "10",
+          "order_type": "market"
+        }
+      }
+    ]
+  }
+]
+
+IMPORTANT:
+The place_order tool has NOT executed yet.
+
+The engine sees tool.risky == True, stores the pending
+approval, and pauses.
+
+============================================================
+4. REQUEST #4
+User: "make it 5 shares instead"
+============================================================
+
+The engine resumes the pending approval for call a8.
+
+It classifies the response as "feedback".
+
+The order is NOT executed.
+
+A tool-result message is appended:
+
+{
+  "role": "tool",
+  "id": "a8",
+  "name": "place_order",
+  "content": "NOT EXECUTED: the user wants a change instead: \"make it 5 shares instead\". Revise and try again, or ask them.",
+  "agent": "buyer"
+}
+
+The buyer then generates a new place_order call:
+
+{
+  "role": "assistant",
+  "agent": "buyer",
+  "content": "",
+  "tool_calls": [
+    {
+      "id": "a9",
+      "name": "place_order",
+      "args": {
+        "ticker": "AAPL",
+        "qty": "5",
+        "order_type": "market"
+      }
+    }
+  ]
+}
+
+The engine intercepts a9 because it is risky and pauses again.
+
+The end of state["messages"] is therefore:
+
+[
+  ...
+  {
+    "role": "tool",
+    "id": "a7",
+    "name": "ask_user",
+    "content": "10 shares, market order",
+    "agent": "buyer"
+  },
+  {
+    "role": "assistant",
+    "agent": "buyer",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a8",
+        "name": "place_order",
+        "args": {
+          "ticker": "AAPL",
+          "qty": "10",
+          "order_type": "market"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "id": "a8",
+    "name": "place_order",
+    "content": "NOT EXECUTED: the user wants a change instead: \"make it 5 shares instead\". Revise and try again, or ask them.",
+    "agent": "buyer"
+  },
+  {
+    "role": "assistant",
+    "agent": "buyer",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a9",
+        "name": "place_order",
+        "args": {
+          "ticker": "AAPL",
+          "qty": "5",
+          "order_type": "market"
+        }
+      }
+    ]
+  }
+]
+
+============================================================
+5. REQUEST #5
+User: "yes"
+============================================================
+
+The engine resumes pending call a9.
+
+classify("yes") -> "approve"
+
+Now the engine actually executes:
+
+place_order(
+  ticker="AAPL",
+  qty="5",
+  order_type="market"
+)
+
+The result is appended:
+
+{
+  "role": "tool",
+  "id": "a9",
+  "name": "place_order",
+  "content": "Order ORD-1001 filled: BUY 5 AAPL (market)",
+  "agent": "buyer"
+}
+
+Buyer then calls handoff_back:
+
+{
+  "role": "assistant",
+  "agent": "buyer",
+  "content": "",
+  "tool_calls": [
+    {
+      "id": "a10",
+      "name": "handoff_back",
+      "args": {
+        "summary": "Order ORD-1001 filled: BUY 5 AAPL (market)"
+      }
+    }
+  ]
+}
+
+Engine processes the handoff:
+
+{
+  "role": "tool",
+  "id": "a10",
+  "name": "handoff_back",
+  "content": "Order ORD-1001 filled: BUY 5 AAPL (market)",
+  "agent": "buyer"
+}
+
+Supervisor becomes active and produces the final response:
+
+{
+  "role": "assistant",
+  "agent": "supervisor",
+  "content": "Summary: Order ORD-1001 filled: BUY 5 AAPL (market)",
+  "tool_calls": []
+}
+
+============================================================
+FINAL state["messages"]
+============================================================
+
+[
+  {
+    "role": "user",
+    "content": "Research Apple and buy some if it looks good"
+  },
+
+  {
+    "role": "assistant",
+    "agent": "supervisor",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a1",
+        "name": "transfer_to_researcher",
+        "args": {
+          "task": "Research Apple and buy some if it looks good"
+        }
+      }
+    ]
+  },
+
+  {
+    "role": "tool",
+    "id": "a1",
+    "name": "transfer_to_researcher",
+    "content": "Transferred to researcher. Task: Research Apple and buy some if it looks good",
+    "agent": "supervisor"
+  },
+
+  {
+    "role": "assistant",
+    "agent": "researcher",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a2",
+        "name": "ask_user",
+        "args": {
+          "question": "Which ticker symbol do you mean?"
+        }
+      }
+    ]
+  },
+
+  {
+    "role": "tool",
+    "id": "a2",
+    "name": "ask_user",
+    "content": "AAPL",
+    "agent": "researcher"
+  },
+
+  {
+    "role": "assistant",
+    "agent": "researcher",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a3",
+        "name": "get_stock_price",
+        "args": {
+          "ticker": "AAPL"
+        }
+      }
+    ]
+  },
+
+  {
+    "role": "tool",
+    "id": "a3",
+    "name": "get_stock_price",
+    "content": "AAPL trades at $190.12",
+    "agent": "researcher"
+  },
+
+  {
+    "role": "assistant",
+    "agent": "researcher",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a4",
+        "name": "get_news",
+        "args": {
+          "ticker": "AAPL"
+        }
+      }
+    ]
+  },
+
+  {
+    "role": "tool",
+    "id": "a4",
+    "name": "get_news",
+    "content": "Headlines: strong iPhone demand, analyst upgrade to Buy",
+    "agent": "researcher"
+  },
+
+  {
+    "role": "assistant",
+    "agent": "researcher",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a5",
+        "name": "handoff_back",
+        "args": {
+          "summary": "AAPL trades at $190.12. Headlines: strong iPhone demand, analyst upgrade to Buy. Looks bullish."
+        }
+      }
+    ]
+  },
+
+  {
+    "role": "tool",
+    "id": "a5",
+    "name": "handoff_back",
+    "content": "AAPL trades at $190.12. Headlines: strong iPhone demand, analyst upgrade to Buy. Looks bullish.",
+    "agent": "researcher"
+  },
+
+  {
+    "role": "assistant",
+    "agent": "supervisor",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a6",
+        "name": "transfer_to_buyer",
+        "args": {
+          "task": "Buy it if research looks good. AAPL trades at $190.12. Headlines: strong iPhone demand, analyst upgrade to Buy. Looks bullish."
+        }
+      }
+    ]
+  },
+
+  {
+    "role": "tool",
+    "id": "a6",
+    "name": "transfer_to_buyer",
+    "content": "Transferred to buyer. Task: Buy it if research looks good. AAPL trades at $190.12. Headlines: strong iPhone demand, analyst upgrade to Buy. Looks bullish.",
+    "agent": "supervisor"
+  },
+
+  {
+    "role": "assistant",
+    "agent": "buyer",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a7",
+        "name": "ask_user",
+        "args": {
+          "question": "How many shares, and market or limit order?"
+        }
+      }
+    ]
+  },
+
+  {
+    "role": "tool",
+    "id": "a7",
+    "name": "ask_user",
+    "content": "10 shares, market order",
+    "agent": "buyer"
+  },
+
+  {
+    "role": "assistant",
+    "agent": "buyer",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a8",
+        "name": "place_order",
+        "args": {
+          "ticker": "AAPL",
+          "qty": "10",
+          "order_type": "market"
+        }
+      }
+    ]
+  },
+
+  {
+    "role": "tool",
+    "id": "a8",
+    "name": "place_order",
+    "content": "NOT EXECUTED: the user wants a change instead: \"make it 5 shares instead\". Revise and try again, or ask them.",
+    "agent": "buyer"
+  },
+
+  {
+    "role": "assistant",
+    "agent": "buyer",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a9",
+        "name": "place_order",
+        "args": {
+          "ticker": "AAPL",
+          "qty": "5",
+          "order_type": "market"
+        }
+      }
+    ]
+  },
+
+  {
+    "role": "tool",
+    "id": "a9",
+    "name": "place_order",
+    "content": "Order ORD-1001 filled: BUY 5 AAPL (market)",
+    "agent": "buyer"
+  },
+
+  {
+    "role": "assistant",
+    "agent": "buyer",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "a10",
+        "name": "handoff_back",
+        "args": {
+          "summary": "Order ORD-1001 filled: BUY 5 AAPL (market)"
+        }
+      }
+    ]
+  },
+
+  {
+    "role": "tool",
+    "id": "a10",
+    "name": "handoff_back",
+    "content": "Order ORD-1001 filled: BUY 5 AAPL (market)",
+    "agent": "buyer"
+  },
+
+  {
+    "role": "assistant",
+    "agent": "supervisor",
+    "content": "Summary: Order ORD-1001 filled: BUY 5 AAPL (market)",
+    "tool_calls": []
+  }
+]
+
+============================================================
+KEY THING TO NOTICE
+============================================================
+
+There are three message roles:
+
+"user"
+    Original user input.
+
+"assistant"
+    An agent/LLM decision, usually a tool call.
+
+"tool"
+    The engine/tool's result, including HITL responses.
+
+HITL does not create a special "human" message.
+
+For a pending ask_user:
+    USER -> becomes TOOL RESULT for ask_user
+
+For a pending risky tool:
+    USER -> becomes the decision that determines the TOOL RESULT
+
+The entire messages array is retained and resent to the active
+agent on every Claude call.
